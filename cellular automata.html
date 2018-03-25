@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>cellular automata</title>
+</head>
+<body>
+
+<style type="text/css">
+	
+	#myRange{
+		width: 500px;
+	}
+</style>
+
+
+<canvas></canvas>
+<div class="slidecontainer">
+  <input type="range" min="1" max="500" value="50" class="slider" id="myRange">
+  <h1 id="demo">50</h1>
+  <button onclick="update()">Update</button>
+</div>
+
+</body>
+
+<script type="text/javascript">
+	
+var canvas = document.querySelector('canvas');
+canvas.width = window.innerHeight - 100;
+canvas.height = window.innerHeight - 100;
+var c = canvas.getContext('2d');
+
+let rows = 50;
+let columns = 50;
+let can = [];
+let newBoard = [];
+
+let calcBoard = function(){
+	let board = [];
+	for (var i = 0; i < rows; i++) {
+		let row = [];
+		for (var j = 0; j < columns; j++) {
+			let int =  Math.floor(Math.random() * (7 - 0)) + 0;
+			row.push(int);
+		}
+		board.push(row);
+	}
+	can = board;
+	newBoard = board;
+	console.log(can);
+}
+
+let mode = function (arr){
+    return arr.sort((a,b) =>
+          arr.filter(v => v===a).length
+        - arr.filter(v => v===b).length
+    ).pop();
+    }
+
+//-----------RULES---------------
+//Look at all surrounding cells and determine what is most prevalent.
+//If there is one color that is most prevalent, change to that, otherwise stay.
+
+let getNeighbors = function(x,y){ 
+	let total = [];
+	let totalNum = 0;
+	for (var i = -1; i < 2; i++) { 
+		for (var j = -1; j < 2; j++) { 
+
+			if(i==0 && j==0){
+				continue
+			}
+			else {
+			// console.log(can[((x + i) + rows)% rows][((y + j) + rows)% rows]);
+			total.push( can[((x + i) + rows)% rows][((y + j) + rows)% rows]);
+			totalNum += can[((x + i) + rows)% rows][((y + j) + rows)% rows];
+
+			}
+		}
+	}
+	// console.log(total);
+// if (mode(total) == 0){
+// 	newBoard[x][y] = 1;
+// 	newBoard[((x -1) + rows)% rows][((y -1) + rows)% rows] = 1;
+
+// }else if (mode(total) == 1){
+// 	newBoard[x][y] = 2;
+// 	newBoard[((x +1) + rows)% rows][((y +1) + rows)% rows] = 2;
+
+// }else if (mode(total) == 2){
+// 	newBoard[x][y] = 3;
+// 	newBoard[((x -1) + rows)% rows][((y) + rows)% rows] = 3;
+
+// } else if (mode(total) == 3){
+// 	newBoard[x][y] = 4;
+// 	newBoard[((x) + rows)% rows][((y -1) + rows)% rows] = 4;
+
+// }else if (mode(total) == 4){
+// 	newBoard[x][y] = 5;
+// 	newBoard[((x +1) + rows)% rows][((y) + rows)% rows] = 5;
+
+// }else if (mode(total) == 5){
+// 	newBoard[x][y] = 6;
+// 	newBoard[((x) + rows)% rows][((y +1) + rows)% rows] = 6;
+
+// }else if (mode(total) == 6){
+// 	newBoard[x][y] = 0;
+// 	newBoard[((x -1) + rows)% rows][((y -1) + rows)% rows] = 7;
+
+// }
+
+if (can[x][y] < Math.floor(totalNum/8) && can[x][y]%2 ==0){ 
+	newBoard[x][y] = mode(total)+1;
+} else if (can[x][y] > Math.floor(totalNum/8)){
+	newBoard[x][y] = mode(total)-1;
+} else if (can[x][y] < 0){
+	newBoard[x][y] = - can[x][y]+2} 
+else if (can[x][y] > 6 && can[x][y]%3 ==0){
+	newBoard[x][y] = newBoard[x][y]-2}
+else {
+	newBoard[x][y] = mode(total);
+}
+
+
+}
+
+
+
+
+let update = function(){
+	for (var i = 0; i < can.length; i++) {
+		for (var j = 0; j < can.length; j++) {
+			getNeighbors(i,j);
+		}
+	}
+	can = newBoard;
+	drawBoard();
+	window.requestAnimationFrame(update);
+
+}
+
+
+let drawBoard = function(){
+	console.log("tick");
+	c.clearRect(0,0,canvas.width,canvas.height);
+	for (var i = 0; i < can.length; i++) {
+
+		for (var j = 0; j < can.length; j++) {
+			if(can[i][j] == 0){
+				c.fillStyle = "red";
+			}
+			else if(can[i][j] == 1){
+				c.fillStyle = "orange";
+			}
+			else if(can[i][j] == 2){
+				c.fillStyle = "yellow";
+			}
+			else if(can[i][j] == 3){
+				c.fillStyle = "green";
+			}
+			else if(can[i][j] == 4){
+				c.fillStyle = "blue";
+			}
+			else if(can[i][j] == 5){
+				c.fillStyle = "indigo";
+			}
+			else if(can[i][j] == 6){
+				c.fillStyle = "purple";
+			}
+			else {c.fillStyle = "black"};
+
+
+		c.fillRect((canvas.width/columns)*j	,(canvas.height/rows)*i,canvas.width/columns,canvas.height/rows);
+
+		}
+
+	}
+
+	
+
+}
+
+
+
+
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+    output.innerHTML = this.value;
+    rows = parseInt(this.value);
+    columns = parseInt(this.value);
+    calcBoard();
+    drawBoard();
+}
+
+
+
+
+
+</script>
+
+</html>
